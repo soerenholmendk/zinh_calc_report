@@ -10,7 +10,10 @@ ABAP report (ALV) that lists production order operations with their standard val
 | S_ARBPL | Work center      | CRHD-ARBPL   |
 | S_AUFNR | Production order | AUFK-AUFNR   |
 
-Only production orders (AUFK-AUTYP = 10) and main operations (no sub-operations) are selected.
+| P_REL   | Radio button: only released orders (status REL) | JEST |
+| P_ALL   | Radio button: both created and released orders (CRTD or REL) | JEST |
+
+Only production orders (AUFK-AUTYP = 10) and main operations (no sub-operations) are selected. Orders that are technically completed (TECO), closed (CLSD) or flagged for deletion (DLFL) are always excluded.
 
 ## How the standard value columns are built
 
@@ -27,7 +30,7 @@ Plant, Work center, Std. value key, Order, Material, Order qty + unit, Operation
 
 ## Tables used
 
-AUFK, AFKO, AFVC, AFVV, CRHD, TC21, TC20T
+AUFK, AFKO, AFVC, AFVV, CRHD, JEST, TC21, TC20T
 
 ## Installation
 

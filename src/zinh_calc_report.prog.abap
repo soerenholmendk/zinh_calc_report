@@ -23,6 +23,11 @@ SELECTION-SCREEN BEGIN OF BLOCK b1 WITH FRAME.
                   s_aufnr FOR gv_aufnr.
 SELECTION-SCREEN END OF BLOCK b1.
 
+SELECTION-SCREEN BEGIN OF BLOCK b2 WITH FRAME TITLE TEXT-b02.
+  PARAMETERS: p_rel RADIOBUTTON GROUP stat DEFAULT 'X',  " only released
+              p_all RADIOBUTTON GROUP stat.              " created + released
+SELECTION-SCREEN END OF BLOCK b2.
+
 *----------------------------------------------------------------------*
 CLASS lcl_report DEFINITION FINAL.
   PUBLIC SECTION.
@@ -30,7 +35,12 @@ CLASS lcl_report DEFINITION FINAL.
 
   PRIVATE SECTION.
     CONSTANTS: gc_autyp_prod TYPE aufk-autyp VALUE '10',  " production order
-               gc_max_par    TYPE i          VALUE 6.     " PAR01..PAR06
+               gc_max_par    TYPE i          VALUE 6,     " PAR01..PAR06
+               gc_stat_crtd  TYPE j_status   VALUE 'I0001',
+               gc_stat_rel   TYPE j_status   VALUE 'I0002',
+               gc_stat_teco  TYPE j_status   VALUE 'I0045',
+               gc_stat_clsd  TYPE j_status   VALUE 'I0046',
+               gc_stat_dlfl  TYPE j_status   VALUE 'I0076'.
 
     TYPES: BEGIN OF ty_op,
              werks TYPE aufk-werks,
@@ -103,6 +113,23 @@ CLASS lcl_report IMPLEMENTATION.
 
 
   METHOD select_operations.
+    DATA: lt_stat_incl TYPE RANGE OF j_status,
+          lt_stat_excl TYPE RANGE OF j_status.
+
+    " Order status filter (system status, JEST):
+    "   P_REL: REL active
+    "   P_ALL: CRTD or REL active
+    " Technically completed, closed and deletion-flagged orders are
+    " always excluded.
+    lt_stat_incl = VALUE #( sign = 'I' option = 'EQ' ( low = gc_stat_rel ) ).
+    IF p_all = abap_true.
+      APPEND VALUE #( sign = 'I' option = 'EQ' low = gc_stat_crtd ) TO lt_stat_incl.
+    ENDIF.
+    lt_stat_excl = VALUE #( sign = 'I' option = 'EQ'
+                            ( low = gc_stat_teco )
+                            ( low = gc_stat_clsd )
+                            ( low = gc_stat_dlfl ) ).
+
     " Main operations (no sub-operations) of production orders
     SELECT k~werks,
            h~arbpl,
@@ -129,7 +156,15 @@ CLASS lcl_report IMPLEMENTATION.
         AND k~aufnr IN @s_aufnr
         AND k~autyp =  @gc_autyp_prod
         AND h~arbpl IN @s_arbpl
-        AND c~sumnr =  '00000000'.
+        AND c~sumnr =  '00000000'
+        AND EXISTS ( SELECT objnr FROM jest
+                       WHERE objnr =  k~objnr
+                         AND stat  IN @lt_stat_incl
+                         AND inact =  @space )
+        AND NOT EXISTS ( SELECT objnr FROM jest
+                           WHERE objnr =  k~objnr
+                             AND stat  IN @lt_stat_excl
+                             AND inact =  @space ).
 
     SORT mt_op BY werks arbpl aufnr vornr.
   ENDMETHOD.

@@ -43,7 +43,7 @@ CLASS lcl_report DEFINITION FINAL.
              vornr TYPE afvc-vornr,
              ltxa1 TYPE afvc-ltxa1,
              bmsch TYPE afvv-bmsch,
-             meinh TYPE afvc-meinh,
+             meinh TYPE afvv-meinh,
              vgw01 TYPE afvv-vgw01,
              vgw02 TYPE afvv-vgw02,
              vgw03 TYPE afvv-vgw03,
@@ -114,7 +114,7 @@ CLASS lcl_report IMPLEMENTATION.
            c~vornr,
            c~ltxa1,
            v~bmsch,
-           c~meinh,
+           v~meinh,
            v~vgw01, v~vgw02, v~vgw03, v~vgw04, v~vgw05, v~vgw06,
            v~vge01, v~vge02, v~vge03, v~vge04, v~vge05, v~vge06
       FROM aufk AS k
@@ -205,7 +205,7 @@ CLASS lcl_report IMPLEMENTATION.
     add_comp( EXPORTING iv_name = 'VORNR' iv_ddic = 'AFVC-VORNR'  CHANGING ct_comp = lt_comp ).
     add_comp( EXPORTING iv_name = 'LTXA1' iv_ddic = 'AFVC-LTXA1'  CHANGING ct_comp = lt_comp ).
     add_comp( EXPORTING iv_name = 'BMSCH' iv_ddic = 'AFVV-BMSCH'  CHANGING ct_comp = lt_comp ).
-    add_comp( EXPORTING iv_name = 'MEINH' iv_ddic = 'AFVC-MEINH'  CHANGING ct_comp = lt_comp ).
+    add_comp( EXPORTING iv_name = 'MEINH' iv_ddic = 'AFVV-MEINH'  CHANGING ct_comp = lt_comp ).
 
     " One value column + one unit column per standard value parameter
     LOOP AT mt_param ASSIGNING FIELD-SYMBOL(<ls_param>).
